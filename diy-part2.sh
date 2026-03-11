@@ -1,7 +1,7 @@
 #!/bin/bash
 # ============================================================================
 # diy-part2.sh - OpenWrt 自定义脚本 (配置阶段)
-# 参考：P3TERX/Actions-OpenWrt 成功案例
+# 只编译核心基础插件，不要 LuCI 界面
 # ============================================================================
 
 set -e
@@ -21,36 +21,37 @@ echo "🔄 更新 feeds..."
 ./scripts/feeds install -a
 
 # ============================================================================
-# 2. 写入自定义配置
+# 2. 写入自定义配置（只编译核心基础插件）
 # ============================================================================
 echo "⚙️ 写入自定义配置..."
 
 cat >> .config << 'EOF'
-# LuCI 中文
-CONFIG_LUCI_LANG_zh-cn=y
+# ============================================================
+# 核心基础插件 - 不要 LuCI 界面
+# ============================================================
 
-# 必装插件 (不要 PassWall，不要 SSR-Plus)
-CONFIG_PACKAGE_luci-app-adguardhome=y
-CONFIG_PACKAGE_luci-app-cloudflared=y
-CONFIG_PACKAGE_luci-app-openclash=y
-CONFIG_PACKAGE_luci-app-qbittorrent=y
-CONFIG_PACKAGE_luci-app-dockerman=y
-CONFIG_PACKAGE_luci-app-filebrowser=y
-CONFIG_PACKAGE_luci-app-sqm=y
-CONFIG_PACKAGE_luci-app-ttyd=y
-CONFIG_PACKAGE_luci-app-vlmcsd=y
-CONFIG_PACKAGE_luci-app-diskman=y
-CONFIG_PACKAGE_luci-app-reboot=y
-CONFIG_PACKAGE_luci-app-lxc=y
-CONFIG_PACKAGE_luci-app-filemanager=y
-CONFIG_PACKAGE_luci-app-daed=y
+# OpenClash 核心
+CONFIG_PACKAGE_OpenClash=y
 
-# Docker
+# Docker 核心
 CONFIG_PACKAGE_docker=y
 CONFIG_PACKAGE_dockerd=y
 CONFIG_PACKAGE_containerd=y
 CONFIG_PACKAGE_runc=y
 CONFIG_PACKAGE_libseccomp=y
+
+# 网络工具
+CONFIG_PACKAGE_curl=y
+CONFIG_PACKAGE_wget=y
+CONFIG_PACKAGE_git=y
+CONFIG_PACKAGE_htop=y
+CONFIG_PACKAGE_nano=y
+CONFIG_PACKAGE_tmux=y
+CONFIG_PACKAGE_bash=y
+CONFIG_PACKAGE_ca-bundle=y
+CONFIG_PACKAGE_ca-certificates=y
+CONFIG_PACKAGE_tcpdump=y
+CONFIG_PACKAGE_mtr=y
 
 # USB 支持
 CONFIG_PACKAGE_kmod-usb-core=y
@@ -74,16 +75,11 @@ CONFIG_PACKAGE_kmod-fs-ntfs3=y
 CONFIG_PACKAGE_kmod-fs-exfat=y
 CONFIG_PACKAGE_kmod-fuse=y
 
-# 基础工具
-CONFIG_PACKAGE_curl=y
-CONFIG_PACKAGE_wget=y
-CONFIG_PACKAGE_git=y
-CONFIG_PACKAGE_htop=y
-CONFIG_PACKAGE_nano=y
-CONFIG_PACKAGE_tmux=y
-CONFIG_PACKAGE_bash=y
-CONFIG_PACKAGE_ca-bundle=y
-CONFIG_PACKAGE_ca-certificates=y
+# 基础 LuCI（最小化）
+CONFIG_PACKAGE_luci=y
+CONFIG_PACKAGE_luci-base=y
+CONFIG_PACKAGE_luci-ssl=y
+CONFIG_LUCI_LANG_zh-cn=y
 
 # 禁用不需要的包
 # CONFIG_PACKAGE_automount is not set
