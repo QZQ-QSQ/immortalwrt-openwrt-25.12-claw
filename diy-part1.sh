@@ -9,6 +9,16 @@ echo "=========================================="
 echo "💕 强哥专属固件 - diy-part1.sh 执行中"
 echo "=========================================="
 
+# ============================================================================
+# 0. 配置 Git 跳过认证 (GitHub Actions 必需)
+# ============================================================================
+echo "⚙️ 配置 Git..."
+
+git config --global credential.helper ''
+git config --global url."https://github.com/".insteadOf git@github.com:
+export GIT_ASKPASS=true
+export GIT_TERMINAL_PROMPT=0
+
 cd openwrt
 
 # ============================================================================
@@ -16,8 +26,8 @@ cd openwrt
 # ============================================================================
 echo "📦 添加第三方软件源 (kenzok8/small)..."
 
-git clone --depth 1 https://github.com/kenzok8/small.git package/small
-git clone --depth 1 https://github.com/kenzok8/small-package.git package/small-package
+git clone --depth 1 https://github.com/kenzok8/small.git package/small || git clone https://github.com/kenzok8/small.git package/small
+git clone --depth 1 https://github.com/kenzok8/small-package.git package/small-package || git clone https://github.com/kenzok8/small-package.git package/small-package
 
 # ============================================================================
 # 2. 添加其他常用第三方源
