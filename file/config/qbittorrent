@@ -1,0 +1,6 @@
+
+config qbittorrent 'config'
+	option enabled '1'
+	option download_dir '/mnt/sdc1/qBittorrent'
+	option http_port '8082'
+

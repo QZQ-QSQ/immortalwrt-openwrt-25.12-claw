@@ -1,0 +1,13 @@
+
+config globals
+	option workgroup 'WORKGROUP'
+	option description 'Ksmbd on OpenWrt'
+
+config share
+	option name '移动硬盘'
+	option path '/mnt/sdc1'
+	option read_only 'no'
+	option guest_ok 'yes'
+	option create_mask '0666'
+	option dir_mask '0777'
+
