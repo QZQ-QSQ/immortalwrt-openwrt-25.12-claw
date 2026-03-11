@@ -17,6 +17,20 @@ git config --global user.name "QiangGe"
 cd openwrt
 
 # ============================================================================
+# 0. 修复 LLVM 编译卡住问题
+# ============================================================================
+echo "🔧 修复 LLVM 编译问题..."
+
+# 禁用 LLVM BPF（容易卡住）
+echo 'CONFIG_TOOLS_LLVM_BPF=n' >> .config
+
+# 如果 feeds/packages 有 Rust，禁用 download-ci-llvm
+if [ -f "feeds/packages/lang/rust/Makefile" ]; then
+    sed -i 's/download-ci-llvm = true/download-ci-llvm = false/g' feeds/packages/lang/rust/Makefile
+    echo "✅ Rust LLVM 修复完成"
+fi
+
+# ============================================================================
 # 1. 添加第三方软件包源
 # ============================================================================
 echo "📦 添加第三方软件包源..."
