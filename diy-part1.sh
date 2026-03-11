@@ -6,7 +6,7 @@
 set -e
 
 echo "=========================================="
-echo "💕 强哥专属固件 - diy-part1.sh 执行中"
+echo "💕  diy-part1.sh 执行中"
 echo "=========================================="
 
 cd openwrt
@@ -16,19 +16,19 @@ cd openwrt
 # ============================================================================
 echo "📦 添加第三方软件源 (kenzok8/small)..."
 
-git clone --depth 1 https://github.com/kenzok8/small package/small
-git clone --depth 1 https://github.com/kenzok8/small-package package/small-package
+git clone --depth 1 https://github.com/kenzok8/small.git package/small
+git clone --depth 1 https://github.com/kenzok8/small-package.git package/small-package
 
 # ============================================================================
 # 2. 添加其他常用第三方源
 # ============================================================================
 echo "📦 添加其他第三方软件源..."
 
-git clone --depth 1 https://github.com/immortalwrt/packages package/immortalwrt-packages
-git clone --depth 1 https://github.com/Lienol/openwrt-package package/lienol
-git clone --depth 1 -b master https://github.com/vernesong/OpenClash package/OpenClash
-git clone --depth 1 -b master https://github.com/lisaac/luci-app-diskman package/luci-app-diskman
-git clone --depth 1 https://github.com/kiddin9/openwrt-docker package/openwrt-docker
+git clone --depth 1 https://github.com/immortalwrt/packages.git package/immortalwrt-packages
+git clone --depth 1 https://github.com/Lienol/openwrt-package.git package/lienol
+git clone --depth 1 -b master https://github.com/vernesong/OpenClash.git package/OpenClash
+git clone --depth 1 -b master https://github.com/lisaac/luci-app-diskman.git package/luci-app-diskman
+git clone --depth 1 https://github.com/kiddin9/openwrt-docker.git package/openwrt-docker
 
 # ============================================================================
 # 3. 修复依赖问题
