@@ -1,7 +1,7 @@
 #!/bin/bash
 # ============================================================================
 # diy-part1.sh - OpenWrt 自定义脚本 (准备阶段)
-# 参考：P3TERX/Actions-OpenWrt 成功案例
+# 只编译核心基础插件，不要 LuCI 界面
 # ============================================================================
 
 set -e
@@ -21,35 +21,18 @@ cd openwrt
 # ============================================================================
 echo "📦 添加第三方软件包源..."
 
-# 添加 feeds.conf.default (不要 PassWall，不要 Lean)
+# 添加 feeds.conf.default
 cat >> feeds.conf.default << 'EOF'
 src-git immortalwrt_packages https://github.com/immortalwrt/packages.git;openwrt-24.10
-src-git lienol https://github.com/Lienol/openwrt-package.git
-src-git daed https://github.com/mosajjal/daed.git
 EOF
 
 # ============================================================================
-# 2. 克隆第三方插件
+# 2. 克隆第三方插件（只克隆核心插件）
 # ============================================================================
 echo "📦 克隆第三方插件..."
 
-# OpenClash
+# OpenClash（核心）
 git clone --depth 1 -b master https://github.com/vernesong/OpenClash.git package/OpenClash
-
-# Dockerman
-git clone --depth 1 -b master https://github.com/lisaac/luci-app-dockerman.git package/luci-app-dockerman
-
-# FileBrowser
-git clone --depth 1 https://github.com/immortalwrt/packages.git package/packages-temp
-mv package/packages-temp/applications/luci-app-filebrowser package/
-mv package/packages-temp/utils/filebrowser package/
-rm -rf package/packages-temp
-
-# Tailscale
-git clone --depth 1 https://github.com/immortalwrt/packages.git package/packages-temp2
-mv package/packages-temp2/net/tailscale package/
-mv package/packages-temp2/net/luci-app-tailscale package/
-rm -rf package/packages-temp2
 
 # ============================================================================
 # 3. 替换默认配置
@@ -71,15 +54,7 @@ sed -i '/set network.lan.dns/d' package/base-files/files/bin/config_generate
 sed -i '/set network.lan.ipaddr/a\set network.lan.dns=\"223.5.5.5 114.114.114.114\"' package/base-files/files/bin/config_generate
 
 # ============================================================================
-# 4. 删除默认主题（可选）
-# ============================================================================
-echo "🎨 配置主题..."
-
-# 删除默认主题，使用 bootstrap
-# rm -rf package/feeds/luci/luci-theme-argon
-
-# ============================================================================
-# 5. 清理缓存
+# 4. 清理缓存
 # ============================================================================
 echo "🧹 清理缓存..."
 
