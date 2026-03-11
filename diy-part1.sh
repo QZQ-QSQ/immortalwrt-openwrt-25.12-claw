@@ -1,108 +1,93 @@
 #!/bin/bash
 # ============================================================================
-# diy-part1.sh - ImmortalWrt 自定义脚本 (准备阶段)
+# diy-part1.sh - OpenWrt 自定义脚本 (准备阶段)
+# 参考：P3TERX/Actions-OpenWrt 成功案例
 # ============================================================================
 
 set -e
 
 echo "=========================================="
-echo "💕 强哥专属固件 - diy-part1.sh 执行中"
+echo "💕 强哥专属固件 - diy-part1.sh"
 echo "=========================================="
 
-# ============================================================================
-# 0. 配置 Git 跳过认证 (GitHub Actions 必需)
-# ============================================================================
-echo "⚙️ 配置 Git..."
-
-git config --global credential.helper ''
-git config --global url."https://github.com/".insteadOf git@github.com:
-export GIT_ASKPASS=true
-export GIT_TERMINAL_PROMPT=0
+# 配置 Git
+git config --global user.email "qiangge@example.com"
+git config --global user.name "QiangGe"
 
 cd openwrt
 
 # ============================================================================
-# 1. 添加第三方软件源 (kenzok8/small)
+# 1. 添加第三方软件包源
 # ============================================================================
-echo "📦 添加第三方软件源 (kenzok8/small)..."
+echo "📦 添加第三方软件包源..."
 
-git clone --depth 1 https://github.com/kenzok8/small.git package/small || git clone https://github.com/kenzok8/small.git package/small
-git clone --depth 1 https://github.com/kenzok8/small-package.git package/small-package || git clone https://github.com/kenzok8/small-package.git package/small-package
+# 添加 feeds.conf.default (不要 PassWall，不要 Lean)
+cat >> feeds.conf.default << 'EOF'
+src-git immortalwrt_packages https://github.com/immortalwrt/packages.git;openwrt-24.10
+src-git lienol https://github.com/Lienol/openwrt-package.git
+src-git daed https://github.com/mosajjal/daed.git
+EOF
 
 # ============================================================================
-# 2. 添加其他常用第三方源
+# 2. 克隆第三方插件
 # ============================================================================
-echo "📦 添加其他第三方软件源..."
+echo "📦 克隆第三方插件..."
 
-git clone --depth 1 https://github.com/immortalwrt/packages.git package/immortalwrt-packages
-git clone --depth 1 https://github.com/Lienol/openwrt-package.git package/lienol
+# OpenClash
 git clone --depth 1 -b master https://github.com/vernesong/OpenClash.git package/OpenClash
-git clone --depth 1 -b master https://github.com/lisaac/luci-app-diskman.git package/luci-app-diskman
-git clone --depth 1 https://github.com/kiddin9/openwrt-docker.git package/openwrt-docker
+
+# LXC
+git clone --depth 1 -b main https://github.com/lisaac/luci-app-dockerman.git package/luci-app-dockerman
+
+# FileBrowser
+git clone --depth 1 https://github.com/immortalwrt/packages.git package/packages-temp
+mv package/packages-temp/applications/luci-app-filebrowser package/
+mv package/packages-temp/utils/filebrowser package/
+rm -rf package/packages-temp
+
+# Tailscale
+git clone --depth 1 https://github.com/immortalwrt/packages.git package/packages-temp2
+mv package/packages-temp2/net/tailscale package/
+mv package/packages-temp2/net/luci-app-tailscale package/
+rm -rf package/packages-temp2
 
 # ============================================================================
-# 3. 修复依赖问题
-# ============================================================================
-echo "🔧 修复依赖问题..."
-
-if [ -f "feeds/packages/lang/rust/Makefile" ]; then
-    sed -i 's/download-ci-llvm = true/download-ci-llvm = false/g' feeds/packages/lang/rust/Makefile
-    echo "✅ Rust LLVM 修复完成"
-fi
-
-if [ -f "package/small/Makefile" ]; then
-    sed -i '/fchomo/d' package/small/Makefile 2>/dev/null || true
-    sed -i '/nikki/d' package/small/Makefile 2>/dev/null || true
-fi
-
-# ============================================================================
-# 4. 替换默认配置
+# 3. 替换默认配置
 # ============================================================================
 echo "⚙️ 替换默认配置..."
 
+# 修改主机名
 sed -i 's/ImmortalWrt/ImmortalWrt-QiangGe/g' package/base-files/files/bin/config_generate
+
+# 修改默认 IP
+sed -i 's/192.168.1.1/192.168.1.1/g' package/base-files/files/bin/config_generate
+
+# 修改时区
 sed -i 's/timezone=\"UTC\"/timezone=\"CST-8\"/g' package/base-files/files/bin/config_generate
 sed -i '/timezone=\"CST-8\"/a\set system.@system[-1].zonename=\"Asia/Shanghai\"' package/base-files/files/bin/config_generate
-sed -i "s/hostname='.*'/hostname='ImmortalWrt-QiangGe'/g" package/base-files/files/bin/config_generate
+
+# 添加 DNS
+sed -i '/set network.lan.dns/d' package/base-files/files/bin/config_generate
+sed -i '/set network.lan.ipaddr/a\set network.lan.dns=\"223.5.5.5 114.114.114.114\"' package/base-files/files/bin/config_generate
 
 # ============================================================================
-# 5. 添加自定义脚本
+# 4. 删除默认主题（可选）
 # ============================================================================
-echo "📝 添加自定义脚本..."
+echo "🎨 配置主题..."
 
-mkdir -p files/root/scripts
-
-cat > files/root/scripts/update-plugins.sh << 'EOF'
-#!/bin/sh
-echo "更新插件列表..."
-opkg update
-echo "更新完成！"
-EOF
-chmod +x files/root/scripts/update-plugins.sh
+# 删除默认主题，使用 bootstrap
+# rm -rf package/feeds/luci/luci-theme-argon
 
 # ============================================================================
-# 6. 优化配置
+# 5. 清理缓存
 # ============================================================================
-echo "⚡ 优化配置..."
+echo "🧹 清理缓存..."
 
-echo 'CONFIG_PACKAGE_dnsmasq_full_dhcpv6=y' >> .config
-echo 'CONFIG_PACKAGE_dnsmasq_full_ra=y' >> .config
-echo 'CONFIG_PACKAGE_kmod-usb-core=y' >> .config
-echo 'CONFIG_PACKAGE_kmod-usb2=y' >> .config
-echo 'CONFIG_PACKAGE_kmod-usb3=y' >> .config
-echo 'CONFIG_PACKAGE_kmod-ata-core=y' >> .config
-echo 'CONFIG_PACKAGE_kmod-ata-ahci=y' >> .config
-echo 'CONFIG_PACKAGE_kmod-ata-ahci-platform=y' >> .config
-
-# ============================================================================
-# 7. 清理临时文件
-# ============================================================================
-echo "🧹 清理临时文件..."
-
-find package -name ".git" -type d -exec rm -rf {} + 2>/dev/null || true
+rm -rf ./tmp
+rm -rf ./feeds/*.index
 
 cd ..
 
 echo "=========================================="
-echo "✅ diy-part1.sh 执行完成！"
+echo "✅ diy-part1.sh 完成"
 echo "=========================================="
