@@ -17,14 +17,23 @@ git config --global user.name "QiangGe"
 cd openwrt
 
 # ============================================================================
-# 0. 修复 LLVM 编译卡住问题
+# 0. 修复 LLVM 编译卡住问题（关键修复！）
 # ============================================================================
 echo "🔧 修复 LLVM 编译问题..."
 
-# 禁用 LLVM BPF（容易卡住）
-echo 'CONFIG_TOOLS_LLVM_BPF=n' >> .config
+# 方法 1：直接修改 target/linux/x86/config 禁用 LLVM BPF
+find target/linux -name "config-*" -type f | while read config; do
+    sed -i 's/CONFIG_TOOLS_LLVM_BPF=y/# CONFIG_TOOLS_LLVM_BPF is not set/g' "$config"
+    echo "✅ 已修改：$config"
+done
 
-# 如果 feeds/packages 有 Rust，禁用 download-ci-llvm
+# 方法 2：创建 .config 预设文件
+cat > .config << 'EOF'
+CONFIG_TOOLS_LLVM_BPF=n
+CONFIG_PACKAGE_LLVM_BPF=n
+EOF
+
+# 方法 3：如果 feeds/packages 有 Rust，禁用 download-ci-llvm
 if [ -f "feeds/packages/lang/rust/Makefile" ]; then
     sed -i 's/download-ci-llvm = true/download-ci-llvm = false/g' feeds/packages/lang/rust/Makefile
     echo "✅ Rust LLVM 修复完成"
