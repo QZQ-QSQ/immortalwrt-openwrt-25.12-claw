@@ -1,6 +1,9 @@
 name: ImmortalWrt Builder
 
 on:
+  repository_dispatch:
+    types: [build]
+  
   workflow_dispatch:
     inputs:
       pppoe_username:
