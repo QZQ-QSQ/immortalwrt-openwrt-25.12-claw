@@ -7,19 +7,19 @@ on:
   workflow_dispatch:
     inputs:
       pppoe_username:
-        description: 'PPPoE 账号 (留空不配置)'
+        description: 'PPPoE'
         required: false
         default: ''
       pppoe_password:
-        description: 'PPPoE 密码 (留空不配置)'
+        description: 'PPPoE'
         required: false
         default: ''
       overlay_size:
-        description: 'Overlay 分区大小 (MB)'
+        description: 'Overlay'
         required: false
         default: '256'
       target_type:
-        description: '目标设备类型'
+        description: '
         required: false
         default: 'x86_64'
         type: choice
@@ -33,7 +33,7 @@ on:
           - qualcommax_ipq60xx
           - qualcommax_ipq807x
       cpu_arch:
-        description: 'CPU 架构'
+        description: 'CPU'
         required: false
         default: 'x86_64'
         type: choice
@@ -45,7 +45,7 @@ on:
           - mips
           - mipsel
       cpu_model:
-        description: 'CPU 型号'
+        description: 'CPU'
         required: false
         default: 'generic'
         type: choice
