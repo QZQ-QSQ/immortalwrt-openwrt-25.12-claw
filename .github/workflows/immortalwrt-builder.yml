@@ -71,7 +71,7 @@ on:
       wan_port:
         description: 'WAN port'
         required: true
-        default: 'eth0'
+        default: 'eth1'
         type: choice
         options:
           - eth0
